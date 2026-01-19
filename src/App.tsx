@@ -36,9 +36,7 @@ const shuffleArray = (array) => {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
-};
-
-export default function ProductSwiper() {
+};export default function ProductSwiper() {
   const [products, setProducts] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeHistory, setSwipeHistory] = useState([]);
@@ -208,9 +206,7 @@ export default function ProductSwiper() {
                                  swipe.direction === 'up' ? 'love' : 'never']++;
     });
     return stats;
-  };
-
-  if (showAdmin && !isAdmin) {
+  };if (showAdmin && !isAdmin) {
     return (
       <div className="min-h-screen bg-purple-900 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg p-8 max-w-sm w-full">
@@ -290,8 +286,7 @@ export default function ProductSwiper() {
                   <input type="text" placeholder="Image URL (optional)" value={newProduct.image} onChange={(e) => setNewProduct({...newProduct, image: e.target.value})} className="p-3 border border-gray-300 rounded text-gray-900" />
                 </div>
                 <button onClick={handleAddProduct} className="mt-4 bg-purple-900 text-white px-6 py-3 rounded font-semibold hover:bg-purple-800">Add Product</button>
-              </div>
-              <div className="bg-white text-purple-900 rounded-lg p-6">
+              </div><div className="bg-white text-purple-900 rounded-lg p-6">
                 <h2 className="text-xl font-bold mb-4">All Products</h2>
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {products.map(product => (
@@ -362,9 +357,7 @@ export default function ProductSwiper() {
         </div>
       </div>
     );
-  }
-
-  return (
+  }return (
     <div className="min-h-screen bg-purple-900 text-white relative">
       <div className="p-4 flex justify-between items-center">
         <h1 className="text-2xl font-bold">Product Swiper</h1>
@@ -399,15 +392,17 @@ export default function ProductSwiper() {
           ) : (
             <div className="bg-white rounded-2xl shadow-2xl p-8 text-center text-purple-900 relative z-10"><p className="text-2xl font-bold">No products to show</p></div>
           )}
-        </div
-          </div>
+        </div>
+      </div>
       <div className="fixed bottom-0 left-0 right-0 bg-purple-900 pb-6 pt-4 px-4">
-    <div className="max-w-md mx-auto flex justify-center items-center gap-3">
-      <button onClick={() => handleSwipe('down')} className="bg-gray-600 hover:bg-gray-700 active:scale-95 p-3 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={isComplete}><Trash2 size={20} /></button>
-      <button onClick={() => handleSwipe('left')} className="bg-red-500 hover:bg-red-600 active:scale-95 p-4 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={isComplete}><X size={32} /></button>
-      <button onClick={handleUndo} className="bg-yellow-500 hover:bg-yellow-600 active:scale-95 p-3 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={swipeHistory.length === 0}><RotateCcw size={20} /></button>
-      <button onClick={() => handleSwipe('right')} className="bg-green-500 hover:bg-green-600 active:scale-95 p-4 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={isComplete}><Heart size={32} /></button>
-      <button onClick={() => handleSwipe('up')} className="bg-purple-500 hover:bg-purple-600 active:scale-95 p-3 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={isComplete}><Flame size={20} /></button>
+        <div className="max-w-md mx-auto flex justify-center items-center gap-3">
+          <button onClick={() => handleSwipe('down')} className="bg-gray-600 hover:bg-gray-700 active:scale-95 p-3 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={isComplete}><Trash2 size={20} /></button>
+          <button onClick={() => handleSwipe('left')} className="bg-red-500 hover:bg-red-600 active:scale-95 p-4 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={isComplete}><X size={32} /></button>
+          <button onClick={handleUndo} className="bg-yellow-500 hover:bg-yellow-600 active:scale-95 p-3 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={swipeHistory.length === 0}><RotateCcw size={20} /></button>
+          <button onClick={() => handleSwipe('right')} className="bg-green-500 hover:bg-green-600 active:scale-95 p-4 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={isComplete}><Heart size={32} /></button>
+          <button onClick={() => handleSwipe('up')} className="bg-purple-500 hover:bg-purple-600 active:scale-95 p-3 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={isComplete}><Flame size={20} /></button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+  );
+}
