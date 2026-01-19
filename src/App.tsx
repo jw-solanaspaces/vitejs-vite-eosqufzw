@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, X, Flame, Trash2, RotateCcw, BarChart3 } from 'lucide-react';
 
-// Sample product data - easily replaceable
 const SAMPLE_PRODUCTS = [
   { id: 1, name: "Vintage Graphic Tee", brand: "RetroWear", category: "tshirt", image: "https://picsum.photos/seed/tee1/400/500" },
   { id: 2, name: "Oversized Hoodie", brand: "UrbanStyle", category: "hoodie", image: "https://picsum.photos/seed/hoodie1/400/500" },
@@ -30,8 +29,17 @@ const SAMPLE_PRODUCTS = [
   { id: 25, name: "Framed Art", brand: "WallArt Co", category: "art", image: "https://picsum.photos/seed/framed1/400/500" }
 ];
 
+const shuffleArray = (array) => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 export default function ProductSwiper() {
-  const [products, setProducts] = useState(SAMPLE_PRODUCTS);
+  const [products, setProducts] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [swipeHistory, setSwipeHistory] = useState([]);
   const [showEmailCapture, setShowEmailCapture] = useState(false);
@@ -43,7 +51,7 @@ export default function ProductSwiper() {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [rotation, setRotation] = useState(0);
   const [lastSwipeDirection, setLastSwipeDirection] = useState(null);
-  const [adminView, setAdminView] = useState('analytics'); // 'analytics' or 'products'
+  const [adminView, setAdminView] = useState('analytics');
   const [editingProduct, setEditingProduct] = useState(null);
   const [newProduct, setNewProduct] = useState({
     name: '',
@@ -52,37 +60,33 @@ export default function ProductSwiper() {
     image: ''
   });
 
+  useEffect(() => {
+    setProducts(shuffleArray(SAMPLE_PRODUCTS));
+  }, []);
+
   const currentProduct = products[currentIndex];
   const isComplete = currentIndex >= products.length;
 
   const handleSwipe = (direction) => {
     if (isComplete) return;
-
     const swipe = {
       productId: currentProduct.id,
       product: currentProduct,
       direction,
       timestamp: new Date().toISOString()
     };
-
     setLastSwipeDirection(direction);
-    
-    // Animate card off screen
     const distance = 1000;
     if (direction === 'left') setDragOffset({ x: -distance, y: 0 });
     if (direction === 'right') setDragOffset({ x: distance, y: 0 });
     if (direction === 'up') setDragOffset({ x: 0, y: -distance });
     if (direction === 'down') setDragOffset({ x: 0, y: distance });
-    
     setSwipeHistory([...swipeHistory, swipe]);
-    
-    // Delay the card change to show the animation
     setTimeout(() => {
       setCurrentIndex(currentIndex + 1);
       setDragOffset({ x: 0, y: 0 });
       setRotation(0);
       setLastSwipeDirection(null);
-
       if (currentIndex + 1 >= products.length) {
         setShowEmailCapture(true);
       }
@@ -91,7 +95,6 @@ export default function ProductSwiper() {
 
   const handleUndo = () => {
     if (swipeHistory.length === 0) return;
-    
     setLastSwipeDirection(null);
     const newHistory = [...swipeHistory];
     newHistory.pop();
@@ -126,7 +129,6 @@ export default function ProductSwiper() {
 
   const handleMouseUp = () => {
     if (!dragStart) return;
-    
     const threshold = 100;
     if (Math.abs(dragOffset.x) > threshold) {
       handleSwipe(dragOffset.x > 0 ? 'right' : 'left');
@@ -136,7 +138,6 @@ export default function ProductSwiper() {
       setDragOffset({ x: 0, y: 0 });
       setRotation(0);
     }
-    
     setDragStart(null);
   };
 
@@ -154,13 +155,11 @@ export default function ProductSwiper() {
       alert('Please fill in all required fields');
       return;
     }
-
     const product = {
-      id: Math.max(...products.map(p => p.id)) + 1,
+      id: Math.max(...products.map(p => p.id), 0) + 1,
       ...newProduct,
       image: newProduct.image || `https://picsum.photos/seed/${newProduct.name}/400/500`
     };
-
     setProducts([...products, product]);
     setNewProduct({ name: '', brand: '', category: '', image: '' });
     alert('Product added successfully!');
@@ -177,7 +176,6 @@ export default function ProductSwiper() {
       alert('Please fill in all required fields');
       return;
     }
-
     setProducts(products.map(p => p.id === editingProduct.id ? editingProduct : p));
     setEditingProduct(null);
     alert('Product updated successfully!');
@@ -193,7 +191,6 @@ export default function ProductSwiper() {
       byCategory: {},
       byProduct: {}
     };
-
     swipeHistory.forEach(swipe => {
       const cat = swipe.product.category;
       if (!stats.byCategory[cat]) {
@@ -202,7 +199,6 @@ export default function ProductSwiper() {
       stats.byCategory[cat][swipe.direction === 'right' ? 'like' : 
                             swipe.direction === 'left' ? 'pass' :
                             swipe.direction === 'up' ? 'love' : 'never']++;
-
       const prodName = swipe.product.name;
       if (!stats.byProduct[prodName]) {
         stats.byProduct[prodName] = { like: 0, pass: 0, love: 0, never: 0 };
@@ -211,7 +207,6 @@ export default function ProductSwiper() {
                                  swipe.direction === 'left' ? 'pass' :
                                  swipe.direction === 'up' ? 'love' : 'never']++;
     });
-
     return stats;
   };
 
@@ -228,16 +223,10 @@ export default function ProductSwiper() {
             className="w-full p-3 border border-gray-300 rounded mb-4"
             onKeyPress={(e) => e.key === 'Enter' && handleAdminLogin()}
           />
-          <button
-            onClick={handleAdminLogin}
-            className="w-full bg-purple-900 text-white p-3 rounded font-semibold hover:bg-purple-800"
-          >
+          <button onClick={handleAdminLogin} className="w-full bg-purple-900 text-white p-3 rounded font-semibold hover:bg-purple-800">
             Login
           </button>
-          <button
-            onClick={() => setShowAdmin(false)}
-            className="w-full mt-2 text-purple-900 p-3 rounded font-semibold hover:bg-gray-100"
-          >
+          <button onClick={() => setShowAdmin(false)} className="w-full mt-2 text-purple-900 p-3 rounded font-semibold hover:bg-gray-100">
             Back
           </button>
         </div>
@@ -252,140 +241,56 @@ export default function ProductSwiper() {
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-            <button
-              onClick={() => { setIsAdmin(false); setShowAdmin(false); setAdminPassword(''); }}
-              className="bg-white text-purple-900 px-4 py-2 rounded font-semibold hover:bg-gray-100"
-            >
-              Logout
-            </button>
+            <button onClick={() => { setIsAdmin(false); setShowAdmin(false); setAdminPassword(''); }} className="bg-white text-purple-900 px-4 py-2 rounded font-semibold hover:bg-gray-100">Logout</button>
           </div>
-
-          {/* Tab Navigation */}
           <div className="flex gap-4 mb-6">
-            <button
-              onClick={() => setAdminView('analytics')}
-              className={`px-6 py-3 rounded font-semibold ${
-                adminView === 'analytics' 
-                  ? 'bg-white text-purple-900' 
-                  : 'bg-purple-800 text-white hover:bg-purple-700'
-              }`}
-            >
-              Analytics
-            </button>
-            <button
-              onClick={() => setAdminView('products')}
-              className={`px-6 py-3 rounded font-semibold ${
-                adminView === 'products' 
-                  ? 'bg-white text-purple-900' 
-                  : 'bg-purple-800 text-white hover:bg-purple-700'
-              }`}
-            >
-              Manage Products ({products.length})
-            </button>
+            <button onClick={() => setAdminView('analytics')} className={`px-6 py-3 rounded font-semibold ${adminView === 'analytics' ? 'bg-white text-purple-900' : 'bg-purple-800 text-white hover:bg-purple-700'}`}>Analytics</button>
+            <button onClick={() => setAdminView('products')} className={`px-6 py-3 rounded font-semibold ${adminView === 'products' ? 'bg-white text-purple-900' : 'bg-purple-800 text-white hover:bg-purple-700'}`}>Manage Products ({products.length})</button>
           </div>
-
-          {/* Analytics View */}
           {adminView === 'analytics' && (
             <>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-purple-800 p-6 rounded-lg">
-                  <div className="text-3xl font-bold">{stats.total}</div>
-                  <div className="text-purple-200">Total Swipes</div>
-                </div>
-                <div className="bg-green-600 p-6 rounded-lg">
-                  <div className="text-3xl font-bold">{stats.like}</div>
-                  <div className="text-green-100">Likes</div>
-                </div>
-                <div className="bg-red-600 p-6 rounded-lg">
-                  <div className="text-3xl font-bold">{stats.love}</div>
-                  <div className="text-red-100">Loves</div>
-                </div>
-                <div className="bg-gray-600 p-6 rounded-lg">
-                  <div className="text-3xl font-bold">{stats.pass}</div>
-                  <div className="text-gray-100">Passes</div>
-                </div>
+                <div className="bg-purple-800 p-6 rounded-lg"><div className="text-3xl font-bold">{stats.total}</div><div className="text-purple-200">Total Swipes</div></div>
+                <div className="bg-green-600 p-6 rounded-lg"><div className="text-3xl font-bold">{stats.like}</div><div className="text-green-100">Likes</div></div>
+                <div className="bg-red-600 p-6 rounded-lg"><div className="text-3xl font-bold">{stats.love}</div><div className="text-red-100">Loves</div></div>
+                <div className="bg-gray-600 p-6 rounded-lg"><div className="text-3xl font-bold">{stats.pass}</div><div className="text-gray-100">Passes</div></div>
               </div>
-
               <div className="bg-white text-purple-900 rounded-lg p-6 mb-6">
                 <h2 className="text-xl font-bold mb-4">Swipes by Category</h2>
                 {Object.entries(stats.byCategory).map(([category, counts]) => (
                   <div key={category} className="mb-4 pb-4 border-b border-gray-200 last:border-0">
                     <div className="font-semibold capitalize mb-2">{category}</div>
                     <div className="grid grid-cols-4 gap-2 text-sm">
-                      <div>Like: {counts.like}</div>
-                      <div>Pass: {counts.pass}</div>
-                      <div>Love: {counts.love}</div>
-                      <div>Never: {counts.never}</div>
+                      <div>Like: {counts.like}</div><div>Pass: {counts.pass}</div><div>Love: {counts.love}</div><div>Never: {counts.never}</div>
                     </div>
                   </div>
                 ))}
               </div>
-
               <div className="bg-white text-purple-900 rounded-lg p-6">
                 <h2 className="text-xl font-bold mb-4">Top Products</h2>
-                {Object.entries(stats.byProduct)
-                  .sort((a, b) => (b[1].like + b[1].love) - (a[1].like + a[1].love))
-                  .slice(0, 10)
-                  .map(([product, counts]) => (
-                    <div key={product} className="mb-3 pb-3 border-b border-gray-200 last:border-0">
-                      <div className="font-semibold mb-1">{product}</div>
-                      <div className="grid grid-cols-4 gap-2 text-sm text-gray-600">
-                        <div>Like: {counts.like}</div>
-                        <div>Pass: {counts.pass}</div>
-                        <div>Love: {counts.love}</div>
-                        <div>Never: {counts.never}</div>
-                      </div>
+                {Object.entries(stats.byProduct).sort((a, b) => (b[1].like + b[1].love) - (a[1].like + a[1].love)).slice(0, 10).map(([product, counts]) => (
+                  <div key={product} className="mb-3 pb-3 border-b border-gray-200 last:border-0">
+                    <div className="font-semibold mb-1">{product}</div>
+                    <div className="grid grid-cols-4 gap-2 text-sm text-gray-600">
+                      <div>Like: {counts.like}</div><div>Pass: {counts.pass}</div><div>Love: {counts.love}</div><div>Never: {counts.never}</div>
                     </div>
-                  ))}
+                  </div>
+                ))}
               </div>
             </>
           )}
-
-          {/* Products View */}
           {adminView === 'products' && (
             <>
-              {/* Add New Product */}
               <div className="bg-white text-purple-900 rounded-lg p-6 mb-6">
                 <h2 className="text-xl font-bold mb-4">Add New Product</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input
-                    type="text"
-                    placeholder="Product Name *"
-                    value={newProduct.name}
-                    onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
-                    className="p-3 border border-gray-300 rounded"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Brand Name *"
-                    value={newProduct.brand}
-                    onChange={(e) => setNewProduct({...newProduct, brand: e.target.value})}
-                    className="p-3 border border-gray-300 rounded"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Category (e.g., tshirt, hoodie) *"
-                    value={newProduct.category}
-                    onChange={(e) => setNewProduct({...newProduct, category: e.target.value.toLowerCase()})}
-                    className="p-3 border border-gray-300 rounded"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Image URL (optional)"
-                    value={newProduct.image}
-                    onChange={(e) => setNewProduct({...newProduct, image: e.target.value})}
-                    className="p-3 border border-gray-300 rounded"
-                  />
+                  <input type="text" placeholder="Product Name *" value={newProduct.name} onChange={(e) => setNewProduct({...newProduct, name: e.target.value})} className="p-3 border border-gray-300 rounded text-gray-900" />
+                  <input type="text" placeholder="Brand Name *" value={newProduct.brand} onChange={(e) => setNewProduct({...newProduct, brand: e.target.value})} className="p-3 border border-gray-300 rounded text-gray-900" />
+                  <input type="text" placeholder="Category (e.g., tshirt, hoodie) *" value={newProduct.category} onChange={(e) => setNewProduct({...newProduct, category: e.target.value.toLowerCase()})} className="p-3 border border-gray-300 rounded text-gray-900" />
+                  <input type="text" placeholder="Image URL (optional)" value={newProduct.image} onChange={(e) => setNewProduct({...newProduct, image: e.target.value})} className="p-3 border border-gray-300 rounded text-gray-900" />
                 </div>
-                <button
-                  onClick={handleAddProduct}
-                  className="mt-4 bg-purple-900 text-white px-6 py-3 rounded font-semibold hover:bg-purple-800"
-                >
-                  Add Product
-                </button>
+                <button onClick={handleAddProduct} className="mt-4 bg-purple-900 text-white px-6 py-3 rounded font-semibold hover:bg-purple-800">Add Product</button>
               </div>
-
-              {/* Product List */}
               <div className="bg-white text-purple-900 rounded-lg p-6">
                 <h2 className="text-xl font-bold mb-4">All Products</h2>
                 <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -393,68 +298,25 @@ export default function ProductSwiper() {
                     <div key={product.id} className="border border-gray-200 rounded-lg p-4">
                       {editingProduct?.id === product.id ? (
                         <div className="space-y-3">
-                          <input
-                            type="text"
-                            value={editingProduct.name}
-                            onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})}
-                            className="w-full p-2 border border-gray-300 rounded"
-                          />
-                          <input
-                            type="text"
-                            value={editingProduct.brand}
-                            onChange={(e) => setEditingProduct({...editingProduct, brand: e.target.value})}
-                            className="w-full p-2 border border-gray-300 rounded"
-                          />
-                          <input
-                            type="text"
-                            value={editingProduct.category}
-                            onChange={(e) => setEditingProduct({...editingProduct, category: e.target.value})}
-                            className="w-full p-2 border border-gray-300 rounded"
-                          />
-                          <input
-                            type="text"
-                            value={editingProduct.image}
-                            onChange={(e) => setEditingProduct({...editingProduct, image: e.target.value})}
-                            className="w-full p-2 border border-gray-300 rounded"
-                            placeholder="Image URL"
-                          />
+                          <input type="text" value={editingProduct.name} onChange={(e) => setEditingProduct({...editingProduct, name: e.target.value})} className="w-full p-2 border border-gray-300 rounded text-gray-900" />
+                          <input type="text" value={editingProduct.brand} onChange={(e) => setEditingProduct({...editingProduct, brand: e.target.value})} className="w-full p-2 border border-gray-300 rounded text-gray-900" />
+                          <input type="text" value={editingProduct.category} onChange={(e) => setEditingProduct({...editingProduct, category: e.target.value})} className="w-full p-2 border border-gray-300 rounded text-gray-900" />
+                          <input type="text" value={editingProduct.image} onChange={(e) => setEditingProduct({...editingProduct, image: e.target.value})} className="w-full p-2 border border-gray-300 rounded text-gray-900" placeholder="Image URL" />
                           <div className="flex gap-2">
-                            <button
-                              onClick={handleUpdateProduct}
-                              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-                            >
-                              Save
-                            </button>
-                            <button
-                              onClick={() => setEditingProduct(null)}
-                              className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
-                            >
-                              Cancel
-                            </button>
+                            <button onClick={handleUpdateProduct} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Save</button>
+                            <button onClick={() => setEditingProduct(null)} className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Cancel</button>
                           </div>
                         </div>
                       ) : (
                         <div className="flex justify-between items-center">
                           <div className="flex-1">
                             <div className="font-semibold">{product.name}</div>
-                            <div className="text-sm text-gray-600">
-                              {product.brand} • <span className="capitalize">{product.category}</span>
-                            </div>
+                            <div className="text-sm text-gray-600">{product.brand} • <span className="capitalize">{product.category}</span></div>
                             <div className="text-xs text-gray-400 mt-1">ID: {product.id}</div>
                           </div>
                           <div className="flex gap-2">
-                            <button
-                              onClick={() => setEditingProduct(product)}
-                              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDeleteProduct(product.id)}
-                              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-                            >
-                              Delete
-                            </button>
+                            <button onClick={() => setEditingProduct(product)} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Edit</button>
+                            <button onClick={() => handleDeleteProduct(product.id)} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Delete</button>
                           </div>
                         </div>
                       )}
@@ -471,7 +333,6 @@ export default function ProductSwiper() {
 
   if (showEmailCapture) {
     const liked = swipeHistory.filter(s => s.direction === 'right' || s.direction === 'up');
-    
     return (
       <div className="min-h-screen bg-purple-900 text-white flex items-center justify-center p-4">
         <div className="max-w-md w-full">
@@ -481,7 +342,7 @@ export default function ProductSwiper() {
             <div className="space-y-3 max-h-64 overflow-y-auto">
               {liked.map(swipe => (
                 <div key={swipe.productId} className="flex items-center gap-3 bg-purple-700 p-3 rounded">
-                  <img src={swipe.product.image} alt={swipe.product.name} className="w-16 h-16 object-cover rounded" />
+                  <div className="w-16 h-16 rounded flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: `hsl(${swipe.product.id * 15}, 70%, 50%)` }}>{swipe.product.category.toUpperCase()}</div>
                   <div className="flex-1">
                     <div className="font-semibold">{swipe.product.name}</div>
                     <div className="text-sm text-purple-200">{swipe.product.brand}</div>
@@ -491,38 +352,12 @@ export default function ProductSwiper() {
               ))}
             </div>
           </div>
-          
           <div className="bg-white rounded-lg p-6 text-purple-900">
             <h3 className="text-xl font-bold mb-3">Get 15% off your first order!</h3>
             <p className="mb-4 text-sm">Enter your email to receive your discount code and product updates.</p>
-            <input
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded mb-3"
-            />
-            <button
-              onClick={() => {
-                if (email) {
-                  alert(`Thanks! Code sent to ${email}`);
-                  setEmail('');
-                }
-              }}
-              className="w-full bg-purple-900 text-white p-3 rounded font-semibold hover:bg-purple-800"
-            >
-              Get My Code
-            </button>
-            <button
-              onClick={() => {
-                setCurrentIndex(0);
-                setSwipeHistory([]);
-                setShowEmailCapture(false);
-              }}
-              className="w-full mt-2 text-purple-900 p-3 rounded font-semibold hover:bg-gray-100"
-            >
-              Start Over
-            </button>
+            <input type="email" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full p-3 border border-gray-300 rounded mb-3" />
+            <button onClick={() => { if (email) { alert(`Thanks! Code sent to ${email}`); setEmail(''); }}} className="w-full bg-purple-900 text-white p-3 rounded font-semibold hover:bg-purple-800">Get My Code</button>
+            <button onClick={() => { setCurrentIndex(0); setSwipeHistory([]); setShowEmailCapture(false); setProducts(shuffleArray(products)); }} className="w-full mt-2 text-purple-900 p-3 rounded font-semibold hover:bg-gray-100">Start Over</button>
           </div>
         </div>
       </div>
@@ -531,145 +366,48 @@ export default function ProductSwiper() {
 
   return (
     <div className="min-h-screen bg-purple-900 text-white relative">
-      {/* Header */}
       <div className="p-4 flex justify-between items-center">
         <h1 className="text-2xl font-bold">Product Swiper</h1>
-        <button
-          onClick={() => setShowAdmin(true)}
-          className="p-2 hover:bg-purple-800 rounded"
-        >
-          <BarChart3 size={24} />
-        </button>
+        <button onClick={() => setShowAdmin(true)} className="p-2 hover:bg-purple-800 rounded"><BarChart3 size={24} /></button>
       </div>
-
-      {/* Progress */}
-      <div className="px-4 mb-4">
-        <div className="bg-purple-800 h-2 rounded-full overflow-hidden">
-          <div
-            className="bg-white h-full transition-all duration-300"
-            style={{ width: `${(currentIndex / SAMPLE_PRODUCTS.length) * 100}%` }}
-          />
+      <div className="px-6 pb-2 pt-1">
+        <div className="bg-purple-800 h-2 rounded-full overflow-hidden max-w-md mx-auto">
+          <div className="bg-white h-full transition-all duration-300" style={{ width: `${(currentIndex / products.length) * 100}%` }} />
         </div>
-        <div className="text-center mt-2 text-purple-200">
-          {currentIndex} / {products.length}
-        </div>
+        <div className="text-center mt-1 text-purple-200 text-sm">{currentIndex} / {products.length}</div>
       </div>
-
-      {/* Card Stack */}
-      <div className="flex justify-center items-center px-4 mb-8" style={{ height: 'calc(100vh - 280px)' }}>
-        <div className="relative w-full max-w-sm" style={{ height: '600px' }}>
+      <div className="flex justify-center items-center px-4" style={{ height: 'calc(100vh - 220px)', minHeight: '500px' }}>
+        <div className="relative w-full max-w-md mx-auto" style={{ height: '550px' }}>
+          {!isComplete && products.slice(currentIndex + 1, currentIndex + 3).map((product, idx) => (
+            <div key={product.id} className="absolute inset-0 bg-white rounded-2xl shadow-xl pointer-events-none" style={{ transform: `scale(${1 - (idx + 1) * 0.05}) translateY(${(idx + 1) * 10}px)`, zIndex: 10 - (idx + 1), opacity: 1 - (idx + 1) * 0.3, transition: 'all 0.3s ease' }}>
+              <div className="w-full flex items-center justify-center text-white text-4xl font-bold rounded-t-2xl" style={{ backgroundColor: `hsl(${product.id * 15}, 70%, 50%)`, height: '400px', opacity: 0.5 }} />
+            </div>
+          ))}
           {!isComplete && currentProduct ? (
-            <div
-              className="bg-white rounded-2xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing"
-              style={{
-                transform: `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${rotation}deg)`,
-                transition: dragStart ? 'none' : 'all 0.3s ease',
-                height: '100%',
-                position: 'relative'
-              }}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleMouseUp}
-            >
-              <div 
-                className="w-full flex items-center justify-center text-white text-6xl font-bold"
-                style={{ 
-                  backgroundColor: `hsl(${currentProduct.id * 15}, 70%, 50%)`,
-                  height: '400px'
-                }}
-              >
-                {currentProduct.category.toUpperCase()}
-              </div>
+            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing" style={{ transform: `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${rotation}deg)`, transition: dragStart ? 'none' : 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)', height: '100%', position: 'relative', zIndex: 20 }} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}>
+              <div className="w-full flex items-center justify-center text-white text-6xl font-bold" style={{ backgroundColor: `hsl(${currentProduct.id * 15}, 70%, 50%)`, height: '400px' }}>{currentProduct.category.toUpperCase()}</div>
               <div className="p-6 text-purple-900">
                 <h2 className="text-2xl font-bold mb-1">{currentProduct.name}</h2>
                 <p className="text-lg text-purple-600 mb-2">{currentProduct.brand}</p>
-                <span className="inline-block bg-purple-100 text-purple-900 px-3 py-1 rounded-full text-sm capitalize">
-                  {currentProduct.category}
-                </span>
+                <span className="inline-block bg-purple-100 text-purple-900 px-3 py-1 rounded-full text-sm capitalize">{currentProduct.category}</span>
               </div>
-
-              {/* Swipe indicators */}
-              {(dragOffset.x > 50 || lastSwipeDirection === 'right') && (
-                <div className="absolute top-1/2 left-8 transform -translate-y-1/2 -rotate-12">
-                  <div className="bg-green-500 text-white px-6 py-3 rounded-lg font-bold text-2xl border-4 border-green-500">
-                    LIKE
-                  </div>
-                </div>
-              )}
-              {(dragOffset.x < -50 || lastSwipeDirection === 'left') && (
-                <div className="absolute top-1/2 right-8 transform -translate-y-1/2 rotate-12">
-                  <div className="bg-red-500 text-white px-6 py-3 rounded-lg font-bold text-2xl border-4 border-red-500">
-                    PASS
-                  </div>
-                </div>
-              )}
-              {(dragOffset.y < -50 || lastSwipeDirection === 'up') && (
-                <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-purple-500 text-white px-6 py-3 rounded-lg font-bold text-2xl border-4 border-purple-500">
-                    LOVE
-                  </div>
-                </div>
-              )}
-              {(dragOffset.y > 50 || lastSwipeDirection === 'down') && (
-                <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-gray-500 text-white px-6 py-3 rounded-lg font-bold text-2xl border-4 border-gray-500">
-                    NEVER
-                  </div>
-                </div>
-              )}
+              {(dragOffset.x > 50 || lastSwipeDirection === 'right') && (<div className="absolute top-1/2 left-8 transform -translate-y-1/2 -rotate-12"><div className="bg-green-500 text-white px-6 py-3 rounded-lg font-bold text-2xl border-4 border-green-500">LIKE</div></div>)}
+              {(dragOffset.x < -50 || lastSwipeDirection === 'left') && (<div className="absolute top-1/2 right-8 transform -translate-y-1/2 rotate-12"><div className="bg-red-500 text-white px-6 py-3 rounded-lg font-bold text-2xl border-4 border-red-500">PASS</div></div>)}
+              {(dragOffset.y < -50 || lastSwipeDirection === 'up') && (<div className="absolute top-8 left-1/2 transform -translate-x-1/2"><div className="bg-purple-500 text-white px-6 py-3 rounded-lg font-bold text-2xl border-4 border-purple-500">LOVE</div></div>)}
+              {(dragOffset.y > 50 || lastSwipeDirection === 'down') && (<div className="absolute bottom-24 left-1/2 transform -translate-x-1/2"><div className="bg-gray-500 text-white px-6 py-3 rounded-lg font-bold text-2xl border-4 border-gray-500">NEVER</div></div>)}
             </div>
           ) : (
-            <div className="bg-white rounded-2xl shadow-2xl p-8 text-center text-purple-900">
-              <p className="text-2xl font-bold">No products to show</p>
-            </div>
+            <div className="bg-white rounded-2xl shadow-2xl p-8 text-center text-purple-900 relative z-10"><p className="text-2xl font-bold">No products to show</p></div>
           )}
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="fixed bottom-0 left-0 right-0 bg-purple-900 p-4">
-        <div className="max-w-sm mx-auto flex justify-center items-center gap-4">
-          <button
-            onClick={() => handleSwipe('down')}
-            className="bg-gray-600 hover:bg-gray-700 p-4 rounded-full transition-all disabled:opacity-50"
-            disabled={isComplete}
-          >
-            <Trash2 size={24} />
-          </button>
-          <button
-            onClick={() => handleSwipe('left')}
-            className="bg-red-500 hover:bg-red-600 p-5 rounded-full transition-all disabled:opacity-50"
-            disabled={isComplete}
-          >
-            <X size={28} />
-          </button>
-          <button
-            onClick={handleUndo}
-            className="bg-yellow-500 hover:bg-yellow-600 p-4 rounded-full transition-all disabled:opacity-50"
-            disabled={swipeHistory.length === 0}
-          >
-            <RotateCcw size={24} />
-          </button>
-          <button
-            onClick={() => handleSwipe('right')}
-            className="bg-green-500 hover:bg-green-600 p-5 rounded-full transition-all disabled:opacity-50"
-            disabled={isComplete}
-          >
-            <Heart size={28} />
-          </button>
-          <button
-            onClick={() => handleSwipe('up')}
-            className="bg-purple-500 hover:bg-purple-600 p-4 rounded-full transition-all disabled:opacity-50"
-            disabled={isComplete}
-          >
-            <Flame size={24} />
-          </button>
-        </div>
-      </div>
+        </div
+          </div>
+      <div className="fixed bottom-0 left-0 right-0 bg-purple-900 pb-6 pt-4 px-4">
+    <div className="max-w-md mx-auto flex justify-center items-center gap-3">
+      <button onClick={() => handleSwipe('down')} className="bg-gray-600 hover:bg-gray-700 active:scale-95 p-3 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={isComplete}><Trash2 size={20} /></button>
+      <button onClick={() => handleSwipe('left')} className="bg-red-500 hover:bg-red-600 active:scale-95 p-4 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={isComplete}><X size={32} /></button>
+      <button onClick={handleUndo} className="bg-yellow-500 hover:bg-yellow-600 active:scale-95 p-3 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={swipeHistory.length === 0}><RotateCcw size={20} /></button>
+      <button onClick={() => handleSwipe('right')} className="bg-green-500 hover:bg-green-600 active:scale-95 p-4 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={isComplete}><Heart size={32} /></button>
+      <button onClick={() => handleSwipe('up')} className="bg-purple-500 hover:bg-purple-600 active:scale-95 p-3 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={isComplete}><Flame size={20} /></button>
     </div>
-  );
-}
+  </div>
+</div>
