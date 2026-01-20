@@ -79,7 +79,11 @@ const shuffleArray = (array) => {
     if (direction === 'right') setDragOffset({ x: distance, y: 0 });
     if (direction === 'up') setDragOffset({ x: 0, y: -distance });
     if (direction === 'down') setDragOffset({ x: 0, y: distance });
-    setSwipeHistory([...swipeHistory, swipe]);
+    
+    const newHistory = [...swipeHistory, swipe];
+    setSwipeHistory(newHistory);
+    console.log('Swipe recorded:', direction, 'Total swipes:', newHistory.length);
+    
     setTimeout(() => {
       setCurrentIndex(currentIndex + 1);
       setDragOffset({ x: 0, y: 0 });
@@ -236,6 +240,8 @@ const shuffleArray = (array) => {
     const stats = getSwipeStats();
     const hasData = swipeHistory.length > 0;
     
+    console.log('Admin view - swipeHistory length:', swipeHistory.length);
+    
     return (
       <div className="min-h-screen bg-purple-900 text-white p-4">
         <div className="max-w-4xl mx-auto">
@@ -258,7 +264,8 @@ const shuffleArray = (array) => {
           {!hasData && (
             <div className="bg-yellow-500 text-yellow-900 p-4 rounded-lg mb-6">
               <p className="font-semibold">No swipe data yet!</p>
-              <p className="text-sm">Go back and swipe some products to see analytics. Total swipes recorded: {swipeHistory.length}</p>
+              <p className="text-sm">Go back and swipe some products to see analytics.</p>
+              <p className="text-xs mt-2">Debug: {swipeHistory.length} swipes in memory</p>
             </div>
           )}
           
@@ -268,11 +275,12 @@ const shuffleArray = (array) => {
           </div>
           {adminView === 'analytics' && (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-purple-800 p-6 rounded-lg"><div className="text-3xl font-bold">{stats.total}</div><div className="text-purple-200">Total Swipes</div></div>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                <div className="bg-purple-800 p-6 rounded-lg"><div className="text-3xl font-bold">{stats.total}</div><div className="text-purple-200">Total</div></div>
                 <div className="bg-green-600 p-6 rounded-lg"><div className="text-3xl font-bold">{stats.like}</div><div className="text-green-100">Likes</div></div>
                 <div className="bg-red-600 p-6 rounded-lg"><div className="text-3xl font-bold">{stats.love}</div><div className="text-red-100">Loves</div></div>
                 <div className="bg-gray-600 p-6 rounded-lg"><div className="text-3xl font-bold">{stats.pass}</div><div className="text-gray-100">Passes</div></div>
+                <div className="bg-yellow-600 p-6 rounded-lg"><div className="text-3xl font-bold">{stats.never}</div><div className="text-yellow-100">Nevers</div></div>
               </div>
               <div className="bg-white text-purple-900 rounded-lg p-6 mb-6">
                 <h2 className="text-xl font-bold mb-4">Swipes by Category</h2>
@@ -431,8 +439,8 @@ const shuffleArray = (array) => {
         </div>
         <div className="text-center mt-1 text-purple-200 text-sm">{currentIndex} / {products.length}</div>
       </div>
-      <div className="flex justify-center items-center px-4" style={{ height: 'calc(100vh - 220px)', minHeight: '500px' }}>
-        <div className="relative" style={{ width: '450px', height: '580px', margin: '0 auto' }}>
+      <div className="grid place-items-center px-4" style={{ height: 'calc(100vh - 220px)', minHeight: '500px' }}>
+        <div className="relative" style={{ width: '450px', height: '580px' }}>
           {!isComplete && products.slice(currentIndex + 1, currentIndex + 3).map((product, idx) => (
             <div
               key={product.id}
