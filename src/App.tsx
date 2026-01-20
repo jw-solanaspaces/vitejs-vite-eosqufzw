@@ -156,7 +156,7 @@ const shuffleArray = (array) => {
     const product = {
       id: Math.max(...products.map(p => p.id), 0) + 1,
       ...newProduct,
-      image: newProduct.image || `https://picsum.photos/seed/${newProduct.name}/400/500`
+      image: newProduct.image || ''
     };
     setProducts([...products, product]);
     setNewProduct({ name: '', brand: '', category: '', image: '' });
@@ -280,10 +280,45 @@ const shuffleArray = (array) => {
               <div className="bg-white text-purple-900 rounded-lg p-6 mb-6">
                 <h2 className="text-xl font-bold mb-4">Add New Product</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input type="text" placeholder="Product Name *" value={newProduct.name} onChange={(e) => setNewProduct({...newProduct, name: e.target.value})} className="p-3 border border-gray-300 rounded text-gray-900" />
-                  <input type="text" placeholder="Brand Name *" value={newProduct.brand} onChange={(e) => setNewProduct({...newProduct, brand: e.target.value})} className="p-3 border border-gray-300 rounded text-gray-900" />
-                  <input type="text" placeholder="Category (e.g., tshirt, hoodie) *" value={newProduct.category} onChange={(e) => setNewProduct({...newProduct, category: e.target.value.toLowerCase()})} className="p-3 border border-gray-300 rounded text-gray-900" />
-                  <input type="text" placeholder="Image URL (optional)" value={newProduct.image} onChange={(e) => setNewProduct({...newProduct, image: e.target.value})} className="p-3 border border-gray-300 rounded text-gray-900" />
+                  <input
+                    type="text"
+                    placeholder="Product Name *"
+                    value={newProduct.name}
+                    onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                    className="p-3 border border-gray-300 rounded text-gray-900 placeholder-gray-500"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Brand Name *"
+                    value={newProduct.brand}
+                    onChange={(e) => setNewProduct({...newProduct, brand: e.target.value})}
+                    className="p-3 border border-gray-300 rounded text-gray-900 placeholder-gray-500"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Category (e.g., tshirt, hoodie) *"
+                    value={newProduct.category}
+                    onChange={(e) => setNewProduct({...newProduct, category: e.target.value.toLowerCase()})}
+                    className="p-3 border border-gray-300 rounded text-gray-900 placeholder-gray-500"
+                  />
+                  <div className="md:col-span-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            setNewProduct({...newProduct, image: event.target.result});
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="p-3 border border-gray-300 rounded text-gray-900 w-full"
+                    />
+                    <p className="text-sm text-purple-200 mt-1">Upload an image or leave blank for category placeholder</p>
+                  </div>
                 </div>
                 <button onClick={handleAddProduct} className="mt-4 bg-purple-900 text-white px-6 py-3 rounded font-semibold hover:bg-purple-800">Add Product</button>
               </div><div className="bg-white text-purple-900 rounded-lg p-6">
@@ -369,16 +404,74 @@ const shuffleArray = (array) => {
         </div>
         <div className="text-center mt-1 text-purple-200 text-sm">{currentIndex} / {products.length}</div>
       </div>
-      <div className="flex justify-center items-center px-4" style={{ height: 'calc(100vh - 220px)', minHeight: '500px' }}>
-        <div className="relative w-full max-w-md mx-auto" style={{ height: '550px' }}>
+      <div className="flex justify-center items-center px-4 w-full" style={{ height: 'calc(100vh - 220px)', minHeight: '500px' }}>
+        <div className="relative w-full max-w-md mx-auto" style={{ height: '580px', maxWidth: '450px' }}>
           {!isComplete && products.slice(currentIndex + 1, currentIndex + 3).map((product, idx) => (
-            <div key={product.id} className="absolute inset-0 bg-white rounded-2xl shadow-xl pointer-events-none" style={{ transform: `scale(${1 - (idx + 1) * 0.05}) translateY(${(idx + 1) * 10}px)`, zIndex: 10 - (idx + 1), opacity: 1 - (idx + 1) * 0.3, transition: 'all 0.3s ease' }}>
-              <div className="w-full flex items-center justify-center text-white text-4xl font-bold rounded-t-2xl" style={{ backgroundColor: `hsl(${product.id * 15}, 70%, 50%)`, height: '400px', opacity: 0.5 }} />
+            <div
+              key={product.id}
+              className="absolute left-0 right-0 mx-auto bg-white rounded-2xl shadow-xl pointer-events-none"
+              style={{
+                transform: `scale(${1 - (idx + 1) * 0.05}) translateY(${(idx + 1) * 10}px)`,
+                zIndex: 10 - (idx + 1),
+                opacity: 1 - (idx + 1) * 0.3,
+                transition: 'all 0.3s ease',
+                width: '100%',
+                maxWidth: '450px',
+                height: '580px'
+              }}
+            >
+              <div 
+                className="w-full flex items-center justify-center text-white text-4xl font-bold rounded-t-2xl"
+                style={{ 
+                  backgroundColor: `hsl(${product.id * 15}, 70%, 50%)`,
+                  height: '420px',
+                  opacity: 0.5
+                }}
+              />
             </div>
           ))}
           {!isComplete && currentProduct ? (
-            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing" style={{ transform: `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${rotation}deg)`, transition: dragStart ? 'none' : 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)', height: '100%', position: 'relative', zIndex: 20 }} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}>
-              <div className="w-full flex items-center justify-center text-white text-6xl font-bold" style={{ backgroundColor: `hsl(${currentProduct.id * 15}, 70%, 50%)`, height: '400px' }}>{currentProduct.category.toUpperCase()}</div>
+            <div
+              className="bg-white rounded-2xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing mx-auto"
+              style={{
+                transform: `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${rotation}deg)`,
+                transition: dragStart ? 'none' : 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                position: 'relative',
+                zIndex: 20,
+                width: '100%',
+                maxWidth: '450px',
+                height: '580px'
+              }}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleMouseUp}
+            >
+              <div 
+                className="w-full flex items-center justify-center overflow-hidden"
+                style={{ height: '420px', backgroundColor: `hsl(${currentProduct.id * 15}, 70%, 50%)` }}
+              >
+                {currentProduct.image ? (
+                  <img 
+                    src={currentProduct.image} 
+                    alt={currentProduct.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div 
+                  className="w-full h-full flex items-center justify-center text-white text-6xl font-bold"
+                  style={{ display: currentProduct.image ? 'none' : 'flex' }}
+                >
+                  {currentProduct.category.toUpperCase()}
+                </div>
+              </div>
               <div className="p-6 text-purple-900">
                 <h2 className="text-2xl font-bold mb-1">{currentProduct.name}</h2>
                 <p className="text-lg text-purple-600 mb-2">{currentProduct.brand}</p>
@@ -393,8 +486,7 @@ const shuffleArray = (array) => {
             <div className="bg-white rounded-2xl shadow-2xl p-8 text-center text-purple-900 relative z-10"><p className="text-2xl font-bold">No products to show</p></div>
           )}
         </div>
-      </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-purple-900 pb-6 pt-4 px-4">
+      </div><div className="fixed bottom-0 left-0 right-0 bg-purple-900 pb-6 pt-4 px-4">
         <div className="max-w-md mx-auto flex justify-center items-center gap-3">
           <button onClick={() => handleSwipe('down')} className="bg-gray-600 hover:bg-gray-700 active:scale-95 p-3 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={isComplete}><Trash2 size={20} /></button>
           <button onClick={() => handleSwipe('left')} className="bg-red-500 hover:bg-red-600 active:scale-95 p-4 rounded-full transition-all disabled:opacity-50 shadow-lg" disabled={isComplete}><X size={32} /></button>
