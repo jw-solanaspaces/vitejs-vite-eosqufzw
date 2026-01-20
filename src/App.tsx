@@ -232,13 +232,23 @@ const shuffleArray = (array) => {
 
   if (isAdmin) {
     const stats = getSwipeStats();
+    const hasData = swipeHistory.length > 0;
+    
     return (
       <div className="min-h-screen bg-purple-900 text-white p-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-            <button onClick={() => { setIsAdmin(false); setShowAdmin(false); setAdminPassword(''); }} className="bg-white text-purple-900 px-4 py-2 rounded font-semibold hover:bg-gray-100">Logout</button>
+            <button onClick={() => { setIsAdmin(false); setShowAdmin(false); }} className="bg-white text-purple-900 px-4 py-2 rounded font-semibold hover:bg-gray-100">Back to Swiper</button>
           </div>
+          
+          {!hasData && (
+            <div className="bg-yellow-500 text-yellow-900 p-4 rounded-lg mb-6">
+              <p className="font-semibold">No swipe data yet!</p>
+              <p className="text-sm">Go back and swipe some products to see analytics.</p>
+            </div>
+          )}
+          
           <div className="flex gap-4 mb-6">
             <button onClick={() => setAdminView('analytics')} className={`px-6 py-3 rounded font-semibold ${adminView === 'analytics' ? 'bg-white text-purple-900' : 'bg-purple-800 text-white hover:bg-purple-700'}`}>Analytics</button>
             <button onClick={() => setAdminView('products')} className={`px-6 py-3 rounded font-semibold ${adminView === 'products' ? 'bg-white text-purple-900' : 'bg-purple-800 text-white hover:bg-purple-700'}`}>Manage Products ({products.length})</button>
@@ -278,28 +288,31 @@ const shuffleArray = (array) => {
           {adminView === 'products' && (
             <>
               <div className="bg-white text-purple-900 rounded-lg p-6 mb-6">
-                <h2 className="text-xl font-bold mb-4">Add New Product</h2>
+                <h2 className="text-xl font-bold mb-4 text-purple-900">Add New Product</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <input
                     type="text"
                     placeholder="Product Name *"
                     value={newProduct.name}
                     onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
-                    className="p-3 border border-gray-300 rounded text-gray-900 placeholder-gray-500"
+                    className="p-3 border-2 border-gray-600 rounded placeholder-gray-400"
+                    style={{ backgroundColor: '#2d2d2d', color: '#ffffff' }}
                   />
                   <input
                     type="text"
                     placeholder="Brand Name *"
                     value={newProduct.brand}
                     onChange={(e) => setNewProduct({...newProduct, brand: e.target.value})}
-                    className="p-3 border border-gray-300 rounded text-gray-900 placeholder-gray-500"
+                    className="p-3 border-2 border-gray-600 rounded placeholder-gray-400"
+                    style={{ backgroundColor: '#2d2d2d', color: '#ffffff' }}
                   />
                   <input
                     type="text"
                     placeholder="Category (e.g., tshirt, hoodie) *"
                     value={newProduct.category}
                     onChange={(e) => setNewProduct({...newProduct, category: e.target.value.toLowerCase()})}
-                    className="p-3 border border-gray-300 rounded text-gray-900 placeholder-gray-500"
+                    className="p-3 border-2 border-gray-600 rounded placeholder-gray-400"
+                    style={{ backgroundColor: '#2d2d2d', color: '#ffffff' }}
                   />
                   <div className="md:col-span-2">
                     <input
@@ -315,9 +328,10 @@ const shuffleArray = (array) => {
                           reader.readAsDataURL(file);
                         }
                       }}
-                      className="p-3 border border-gray-300 rounded text-gray-900 w-full"
+                      className="p-3 border-2 border-gray-600 rounded w-full"
+                      style={{ backgroundColor: '#2d2d2d', color: '#ffffff' }}
                     />
-                    <p className="text-sm text-purple-200 mt-1">Upload an image or leave blank for category placeholder</p>
+                    <p className="text-sm text-gray-600 mt-1">Upload an image or leave blank for category placeholder</p>
                   </div>
                 </div>
                 <button onClick={handleAddProduct} className="mt-4 bg-purple-900 text-white px-6 py-3 rounded font-semibold hover:bg-purple-800">Add Product</button>
@@ -404,20 +418,21 @@ const shuffleArray = (array) => {
         </div>
         <div className="text-center mt-1 text-purple-200 text-sm">{currentIndex} / {products.length}</div>
       </div>
-      <div className="flex justify-center items-center px-4 w-full" style={{ height: 'calc(100vh - 220px)', minHeight: '500px' }}>
-        <div className="relative w-full max-w-md mx-auto" style={{ height: '580px', maxWidth: '450px' }}>
+      <div className="flex justify-center items-center px-4" style={{ height: 'calc(100vh - 220px)', minHeight: '500px' }}>
+        <div className="relative mx-auto" style={{ width: '450px', height: '580px' }}>
           {!isComplete && products.slice(currentIndex + 1, currentIndex + 3).map((product, idx) => (
             <div
               key={product.id}
-              className="absolute left-0 right-0 mx-auto bg-white rounded-2xl shadow-xl pointer-events-none"
+              className="absolute bg-white rounded-2xl shadow-xl pointer-events-none"
               style={{
                 transform: `scale(${1 - (idx + 1) * 0.05}) translateY(${(idx + 1) * 10}px)`,
                 zIndex: 10 - (idx + 1),
                 opacity: 1 - (idx + 1) * 0.3,
                 transition: 'all 0.3s ease',
-                width: '100%',
-                maxWidth: '450px',
-                height: '580px'
+                width: '450px',
+                height: '580px',
+                left: '50%',
+                marginLeft: '-225px'
               }}
             >
               <div 
@@ -432,15 +447,16 @@ const shuffleArray = (array) => {
           ))}
           {!isComplete && currentProduct ? (
             <div
-              className="bg-white rounded-2xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing mx-auto"
+              className="bg-white rounded-2xl shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing"
               style={{
                 transform: `translate(${dragOffset.x}px, ${dragOffset.y}px) rotate(${rotation}deg)`,
                 transition: dragStart ? 'none' : 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                position: 'relative',
+                position: 'absolute',
                 zIndex: 20,
-                width: '100%',
-                maxWidth: '450px',
-                height: '580px'
+                width: '450px',
+                height: '580px',
+                left: '50%',
+                marginLeft: '-225px'
               }}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
@@ -452,7 +468,12 @@ const shuffleArray = (array) => {
             >
               <div 
                 className="w-full flex items-center justify-center overflow-hidden"
-                style={{ height: '420px', backgroundColor: `hsl(${currentProduct.id * 15}, 70%, 50%)` }}
+                style={{ 
+                  height: '420px', 
+                  minHeight: '420px',
+                  maxHeight: '420px',
+                  backgroundColor: `hsl(${currentProduct.id * 15}, 70%, 50%)` 
+                }}
               >
                 {currentProduct.image ? (
                   <img 
@@ -472,10 +493,12 @@ const shuffleArray = (array) => {
                   {currentProduct.category.toUpperCase()}
                 </div>
               </div>
-              <div className="p-6 text-purple-900">
-                <h2 className="text-2xl font-bold mb-1">{currentProduct.name}</h2>
-                <p className="text-lg text-purple-600 mb-2">{currentProduct.brand}</p>
-                <span className="inline-block bg-purple-100 text-purple-900 px-3 py-1 rounded-full text-sm capitalize">{currentProduct.category}</span>
+              <div className="p-6 text-purple-900" style={{ height: '160px', minHeight: '160px', maxHeight: '160px' }}>
+                <h2 className="text-2xl font-bold mb-1 truncate">{currentProduct.name}</h2>
+                <p className="text-lg text-purple-600 mb-2 truncate">{currentProduct.brand}</p>
+                <span className="inline-block bg-purple-100 text-purple-900 px-3 py-1 rounded-full text-sm capitalize">
+                  {currentProduct.category}
+                </span>
               </div>
               {(dragOffset.x > 50 || lastSwipeDirection === 'right') && (<div className="absolute top-1/2 left-8 transform -translate-y-1/2 -rotate-12"><div className="bg-green-500 text-white px-6 py-3 rounded-lg font-bold text-2xl border-4 border-green-500">LIKE</div></div>)}
               {(dragOffset.x < -50 || lastSwipeDirection === 'left') && (<div className="absolute top-1/2 right-8 transform -translate-y-1/2 rotate-12"><div className="bg-red-500 text-white px-6 py-3 rounded-lg font-bold text-2xl border-4 border-red-500">PASS</div></div>)}
