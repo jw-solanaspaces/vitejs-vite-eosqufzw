@@ -160,6 +160,8 @@ const shuffleArray = (array) => {
     };
     setProducts([...products, product]);
     setNewProduct({ name: '', brand: '', category: '', image: '' });
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    fileInputs.forEach(input => input.value = '');
     alert('Product added successfully!');
   };
 
@@ -239,13 +241,24 @@ const shuffleArray = (array) => {
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-            <button onClick={() => { setIsAdmin(false); setShowAdmin(false); }} className="bg-white text-purple-900 px-4 py-2 rounded font-semibold hover:bg-gray-100">Back to Swiper</button>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => {
+                  setAdminView(adminView === 'analytics' ? 'products' : 'analytics');
+                  setTimeout(() => setAdminView('analytics'), 0);
+                }} 
+                className="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700"
+              >
+                Refresh Data
+              </button>
+              <button onClick={() => { setIsAdmin(false); setShowAdmin(false); }} className="bg-white text-purple-900 px-4 py-2 rounded font-semibold hover:bg-gray-100">Back to Swiper</button>
+            </div>
           </div>
           
           {!hasData && (
             <div className="bg-yellow-500 text-yellow-900 p-4 rounded-lg mb-6">
               <p className="font-semibold">No swipe data yet!</p>
-              <p className="text-sm">Go back and swipe some products to see analytics.</p>
+              <p className="text-sm">Go back and swipe some products to see analytics. Total swipes recorded: {swipeHistory.length}</p>
             </div>
           )}
           
@@ -419,11 +432,11 @@ const shuffleArray = (array) => {
         <div className="text-center mt-1 text-purple-200 text-sm">{currentIndex} / {products.length}</div>
       </div>
       <div className="flex justify-center items-center px-4" style={{ height: 'calc(100vh - 220px)', minHeight: '500px' }}>
-        <div className="relative mx-auto" style={{ width: '450px', height: '580px' }}>
+        <div className="relative" style={{ width: '450px', height: '580px', margin: '0 auto' }}>
           {!isComplete && products.slice(currentIndex + 1, currentIndex + 3).map((product, idx) => (
             <div
               key={product.id}
-              className="absolute bg-white rounded-2xl shadow-xl pointer-events-none"
+              className="absolute bg-white rounded-2xl shadow-xl pointer-events-none overflow-hidden"
               style={{
                 transform: `scale(${1 - (idx + 1) * 0.05}) translateY(${(idx + 1) * 10}px)`,
                 zIndex: 10 - (idx + 1),
@@ -436,13 +449,26 @@ const shuffleArray = (array) => {
               }}
             >
               <div 
-                className="w-full flex items-center justify-center text-white text-4xl font-bold rounded-t-2xl"
+                className="w-full flex items-center justify-center text-white text-4xl font-bold rounded-t-2xl overflow-hidden"
                 style={{ 
                   backgroundColor: `hsl(${product.id * 15}, 70%, 50%)`,
-                  height: '420px',
-                  opacity: 0.5
+                  height: '420px'
                 }}
-              />
+              >
+                {product.image ? (
+                  <img 
+                    src={product.image} 
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                    style={{ opacity: 0.3 }}
+                  />
+                ) : (
+                  <span style={{ opacity: 0.5 }}>{product.category.toUpperCase()}</span>
+                )}
+              </div>
+              <div className="p-6 bg-white" style={{ height: '160px' }}>
+                <div className="text-lg font-bold text-gray-400 truncate">{product.name}</div>
+              </div>
             </div>
           ))}
           {!isComplete && currentProduct ? (
@@ -472,7 +498,9 @@ const shuffleArray = (array) => {
                   height: '420px', 
                   minHeight: '420px',
                   maxHeight: '420px',
-                  backgroundColor: `hsl(${currentProduct.id * 15}, 70%, 50%)` 
+                  backgroundColor: `hsl(${currentProduct.id * 15}, 70%, 50%)`,
+                  pointerEvents: 'none',
+                  userSelect: 'none'
                 }}
               >
                 {currentProduct.image ? (
@@ -480,15 +508,17 @@ const shuffleArray = (array) => {
                     src={currentProduct.image} 
                     alt={currentProduct.name}
                     className="w-full h-full object-cover"
+                    style={{ pointerEvents: 'none', userSelect: 'none' }}
                     onError={(e) => {
                       e.target.style.display = 'none';
                       e.target.nextSibling.style.display = 'flex';
                     }}
+                    draggable="false"
                   />
                 ) : null}
                 <div 
                   className="w-full h-full flex items-center justify-center text-white text-6xl font-bold"
-                  style={{ display: currentProduct.image ? 'none' : 'flex' }}
+                  style={{ display: currentProduct.image ? 'none' : 'flex', pointerEvents: 'none', userSelect: 'none' }}
                 >
                   {currentProduct.category.toUpperCase()}
                 </div>
